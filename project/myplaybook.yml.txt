@@ -1,0 +1,110 @@
+---
+- hosts: all
+  become: true
+  vars:
+    - domain: "newsite"
+    - db_name: "wordpress"
+    - db_user: "wp_user"
+    - db_root_pass: "1234567"
+    - db_user_pass: "1234567"
+
+  tasks:
+# Installing modules
+    - name: Install Apache, PHP, Maria_DB
+      apt:
+        name={{ item }}
+        update_cache=yes
+        state=latest
+        force_apt_get=yes
+      loop: ['aptitude', 'apache2', 'mariadb-client','python3-pymysql', 'mariadb-server', 'php7.4', 'php7.4-mysql', 'ph>
+# Settings Appache
+    - name: Enable rewrite module
+      shell: /usr/sbin/a2enmod rewrite
+      notify: Reload Apache
+
+    - name: Setting root password
+      mysql_user:
+        name: root
+        password: "{{ db_root_pass }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
+# Settings Maria_DB
+    - name: Remove anonymous users
+      mysql_user:
+        name: ''
+        host_all: true
+        state: absent
+        login_user: root
+        login_password: "{{ db_root_pass }}"
+
+    - name: Remove test database
+      mysql_db:
+        name: test
+        state: absent
+        login_user: root
+        login_password: "{{ db_root_pass }}"
+    - name: "Create new db {{ db_name }}"
+      mysql_db:
+        name: "{{ db_name }}"
+        state: present
+        login_user: root
+        login_password: "{{ db_root_pass }}"
+
+    - name: "Create user for new db {{ db_name }}"
+      mysql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_user_pass }}"
+        priv: "{{ db_name }}.*:ALL"
+        state: present
+        login_user: root
+        login_password: "{{ db_root_pass }}"
+
+# Settings WordPress
+    - name: Create temporary directory
+      file:
+        path: "/home/user/temp/"
+        state: directory
+
+    - name: Installing WordPress
+      unarchive:
+        src: https://wordpress.org/latest.tar.gz
+        dest: "/home/user/temp"
+        remote_src: yes
+
+    - name: Copy wordress' files to html directory
+      copy:
+        src: "/home/user/temp/wordpress/"
+        dest: "/var/www/html/"
+        remote_src: yes
+
+    - name: Remove temporary directory
+      file:
+        path: '{{ item }}'
+        state: absent
+      loop: [ '/home/user/temp/', '/var/www/html/index.html' ]
+
+    - name: Set ownership
+      file:
+        path: "/var/www/html/"
+        state: directory
+        recurse: yes
+        owner: www-data
+        group: www-data
+
+    - name: Set permissions for directory
+      shell: "/usr/bin/find /var/www/html/ -type d -exec chmod 750 {} \\;"
+
+    - name: Set permissions for files
+      shell: "/usr/bin/find /var/www/html/ -type f -exec chmod 640 {} \\;"
+
+    - name: Set up wp-config
+      template:
+        src: "files/wp-config.php.j2"
+        dest: "/var/www/html/wp-config.php"
+
+
+  handlers:
+    - name: Reload Apache
+      service:
+        name: apache2
+        state: reloaded
