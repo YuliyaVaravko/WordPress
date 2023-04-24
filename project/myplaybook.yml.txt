@@ -16,7 +16,7 @@
         update_cache=yes
         state=latest
         force_apt_get=yes
-      loop: ['aptitude', 'apache2', 'mariadb-client','python3-pymysql', 'mariadb-server', 'php7.4', 'php7.4-mysql', 'ph>
+      loop: ['aptitude', 'apache2', 'mariadb-client','python3-pymysql', 'mariadb-server', 'php7.4', 'php7.4-mysql', 'php7.4-cgi', 'php7.4-gd']
 # Settings Appache
     - name: Enable rewrite module
       shell: /usr/sbin/a2enmod rewrite
