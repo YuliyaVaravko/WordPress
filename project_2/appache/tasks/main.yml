@@ -1,0 +1,15 @@
+---
+# tasks file for appache
+# Installing modules
+    - name: Install Apache, PHP, Maria_DB
+      apt:
+        name={{ item }}
+        update_cache=yes
+        state=latest
+        force_apt_get=yes
+      loop: ['aptitude', 'apache2', 'mariadb-client','python3-pymysql', 'mariadb-server', 'php7.4', 'php7.4-mysql', 'php7.4-cgi', 'php7.4-gd', 'php-cli', 'php-fpm', 'php-json',  'php-pdo',  'php-mysql', 'php-zip',  'php-gd', 'php-mbstring',  'php-curl',  'php-xml',  'php-pear', 'php-bcmath']
+
+# Settings Appache
+    - name: Enable rewrite module
+      shell: /usr/sbin/a2enmod rewrite
+      notify: Reload Apache

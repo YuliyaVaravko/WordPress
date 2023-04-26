@@ -1,0 +1,40 @@
+---
+# tasks file for data_base
+# Settings Maria_DB
+    - name: Setting root password
+      mysql_user:
+        name: root
+        password: "{{ db_root_pass }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
+
+    - name: Remove anonymous users
+      mysql_user:
+        name: ''
+        host_all: true
+        state: absent
+        login_user: root
+        login_password: "{{ db_root_pass }}"
+
+    - name: Remove test database
+      mysql_db:
+        name: test
+        state: absent
+        login_user: root
+        login_password: "{{ db_root_pass }}"
+
+    - name: "Create new db {{ db_name }}"
+      mysql_db:
+        name: "{{ db_name }}"
+        state: present
+        login_user: root
+        login_password: "{{ db_root_pass }}"
+
+    - name: "Create user for new db {{ db_name }}"
+      mysql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_user_pass }}"
+        priv: "{{ db_name }}.*:ALL"
+        state: present
+        login_user: root
+        login_password: "{{ db_root_pass }}"

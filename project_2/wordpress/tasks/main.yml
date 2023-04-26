@@ -1,0 +1,46 @@
+---
+# tasks file for wordpress
+# Settings WordPress 
+    - name: Create temporary directory
+      file:
+        path: "/home/user/temp/"
+        state: directory
+
+    - name: Installing WordPress
+      unarchive:
+        src: https://wordpress.org/latest.tar.gz
+        dest: "/home/user/temp"
+        remote_src: yes
+
+    - name: Copy wordress' files to html directory
+      copy:
+        src: "/home/user/temp/wordpress/"
+        dest: "/var/www/html/"
+        remote_src: yes
+
+    - name: Remove temporary directory
+      file:
+        path: '{{ item }}'
+        state: absent
+      loop: [ '/home/user/temp/', '/var/www/html/index.html' ]
+
+
+    - name: Set ownership
+      file:
+        path: "/var/www/html/"
+        state: directory
+        recurse: yes
+        owner: www-data
+        group: www-data
+
+
+    - name: Set permissions for directory
+      shell: "/usr/bin/find /var/www/html/ -type d -exec chmod 750 {} \\;"
+
+    - name: Set permissions for files
+      shell: "/usr/bin/find /var/www/html/ -type f -exec chmod 640 {} \\;"
+
+    - name: Set up wp-config
+      template:
+         src: "wp-config.php.j2"
+         dest: "/var/www/html/wp-config.php"
