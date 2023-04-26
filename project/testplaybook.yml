@@ -16,4 +16,4 @@
         update_cache=yes
         state=latest
         force_apt_get=yes
-      loop: ['aptitude', 'apache2]
+      loop: ['aptitude', 'apache2']
