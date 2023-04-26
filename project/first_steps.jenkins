@@ -1,10 +1,9 @@
 #!groovy
-// Check ub1 properties
 properties([disableConcurrentBuilds()])
 
 pipeline {
     agent { 
-        label 'master'
+        label 'ansible'
         }
     options {
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
@@ -13,12 +12,14 @@ pipeline {
     stages {
         stage("First step") {
             steps {
-                sh 'ssh ansible@192.168.1.48 \'hostname\''
+                git branch: 'main', credentialsId: 'git_key', url: 'git@github.com:YuliyaVaravko/WordPress.git'
             }
         }
         stage("Second step") {
             steps {
-                sh 'ssh ansible@192.168.1.48 \'uptime\''
+                sh 'ls -la'
+                sh 'cd project'
+                sh 'ansible-playbook testplaybook.yml -i inventory'
             }
         }
     }
