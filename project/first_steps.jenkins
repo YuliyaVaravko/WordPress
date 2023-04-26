@@ -1,6 +1,4 @@
 #!groovy
-properties([disableConcurrentBuilds()])
-
 pipeline {
     agent { 
         label 'ansible'
@@ -10,16 +8,15 @@ pipeline {
         timestamps()
     }
     stages {
-        stage("First step") {
+        stage("Clon ansible repo") {
             steps {
                 git branch: 'main', credentialsId: 'git_key', url: 'git@github.com:YuliyaVaravko/WordPress.git'
             }
         }
-        stage("Second step") {
+        stage("Play ansible-playbook") {
             steps {
-                sh 'ls -la'
                 sh 'cd project'
-                sh 'ansible-playbook testplaybook.yml -i inventory'
+                ansiblePlaybook credentialsId: 'my_ansible_key', installation: 'ansible', inventory: 'project/inventory', playbook: 'project/testplaybook.yml'
             }
         }
     }
