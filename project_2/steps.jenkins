@@ -1,0 +1,23 @@
+#!groovy
+pipeline {
+    agent { 
+        label 'ansible'
+        }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+        timestamps()
+    }
+    stages {
+        stage("Clon ansible repo") {
+            steps {
+                git branch: 'main', credentialsId: 'git_key', url: 'git@github.com:YuliyaVaravko/WordPress.git'
+            }
+        }
+        stage("Play ansible-playbook with roles") {
+            steps {
+                sh 'cd project2'
+                ansiblePlaybook credentialsId: 'my_ansible_key', installation: 'ansible', inventory: 'project2/inventory', playbook: 'project2/myplaybook_with_roles.yml'
+            }
+        }
+    }
+}
