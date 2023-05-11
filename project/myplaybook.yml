@@ -5,7 +5,7 @@
     - domain: "newsite"
     - db_name: "wordpress"
     - db_user: "wp_user"
-    - db_root_pass: "1234567"
+    - db_root_pass: "123456jkhjk7"
     - db_user_pass: "1234567"
 
   tasks:
@@ -16,19 +16,36 @@
         update_cache=yes
         state=latest
         force_apt_get=yes
-      loop: ['aptitude', 'apache2', 'mariadb-client','python3-pymysql', 'mariadb-server', 'php7.4', 'php7.4-mysql', 'php7.4-cgi', 'php7.4-gd']
+      loop: ['aptitude', 'apache2', 'mariadb-client','python3-pymysql', 'mariadb-server', 'php7.4', 'php7.4-mysql', 'php7.4-cgi', 'php7.4-gd','ufw']
+
 # Settings Appache
     - name: Enable rewrite module
       shell: /usr/sbin/a2enmod rewrite
-      notify: Reload Apache
+      notify: Restart Apache
 
-    - name: Setting root password
-      mysql_user:
-        name: root
-        password: "{{ db_root_pass }}"
-        login_unix_socket: /var/run/mysqld/mysqld.sock
+ # UFW Configuration
+    - name: Allow HTTP on port 80
+      ufw:
+        rule: allow
+        port: 80
+        proto: tcp
 
 # Settings Maria_DB
+    - name: Set root user password
+      mysql_user:
+        name: root
+        password: "{{ db_root_pass}}"
+        check_implicit_admin: true
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
+    - name: Create .my.cnf
+      template:
+        src: "files/client.my.cnf.j2"
+        dest: "/root/.my.cnf"
+        owner: root
+        group: root
+        mode: 0600
+
     - name: Remove anonymous users
       mysql_user:
         name: ''
@@ -43,6 +60,7 @@
         state: absent
         login_user: root
         login_password: "{{ db_root_pass }}"
+
     - name: "Create new db {{ db_name }}"
       mysql_db:
         name: "{{ db_name }}"
@@ -67,7 +85,7 @@
 
     - name: Installing WordPress
       unarchive:
-        src: https://wordpress.org/latest.tar.gz
+        src: https://wordpress.org/wordpress-6.2.tar.gz
         dest: "/home/user/temp"
         remote_src: yes
 
@@ -104,7 +122,7 @@
 
 
   handlers:
-    - name: Reload Apache
+    - name: Restart Apache
       service:
         name: apache2
-        state: reloaded
+        state: restarted

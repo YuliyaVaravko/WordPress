@@ -1,7 +1,7 @@
 ---
 # handlers file for appache
-    - name: Reload Apache
+    - name: Restart Apache
       service:
         name: apache2
-        state: reloaded
+        state: restarted
 

@@ -8,7 +8,7 @@
 
     - name: Installing WordPress
       unarchive:
-        src: https://wordpress.org/latest.tar.gz
+        src: https://wordpress.org/wordpress-6.2.tar.gz
         dest: "/home/user/temp"
         remote_src: yes
 
