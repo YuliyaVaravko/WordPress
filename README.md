@@ -19,6 +19,5 @@ This project contains scripts for deploying Wordpress for Windows and linux.
 - Wordpress 6.1.1 
 # Contact information
 Yuliya Varavko
-
-yuliya.varavko@gmail.com
 www.linkedin.com/in/yuliya-varavko
+yuliya.varavko@gmail.com
