@@ -21,3 +21,4 @@ This project contains scripts for deploying Wordpress for Windows and linux.
 Yuliya Varavko
 www.linkedin.com/in/yuliya-varavko
 yuliya.varavko@gmail.com
+www.linkedin.com/in/yuliya-varavko
